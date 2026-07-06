@@ -32,8 +32,8 @@ class InputFrame(tk.Frame):
         self._setup_randomization_input()
         self.input_row_resize = 0
         self.input_col_resize = 0
-        self._input_empty_weight = 0
-        self._input_obstacle_weight = 0
+        self.input_empty_weight = 0
+        self.input_obstacle_weight = 0
 
     def _setup_row_col_input(self):
         """sets up the row/column count input for the user interface."""
@@ -99,8 +99,8 @@ class InputFrame(tk.Frame):
 
         # submission button
         def _randomize_maze_command():
-            self._input_empty_weight = empty_tile_weight_input.get()
-            self._input_obstacle_weight = obst_tile_weight_input.get()
+            self.input_empty_weight = empty_tile_weight_input.get()
+            self.input_obstacle_weight = obst_tile_weight_input.get()
             self.event_generate(self.EVENTS.RANDOMIZE.value)
 
         randomize_button = tk.Button(randomization_frame, text="Randomize Map",
