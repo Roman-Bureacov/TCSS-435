@@ -26,24 +26,8 @@ class Navmap:
     def __init__(self, rows, columns):
         self.rows = rows
         self.columns = columns
-        self.grid = np.zeros((self.rows, self.columns), dtype=Tile)
-        self.shape = (self.rows, self.columns)
-
-        for r in range(self.rows):
-            for c in range(self.columns):
-                self.grid[r, c] = Tile.EMPTY
-
-    """Retrieves the tile at the row and column.
-    
-    Args:
-        row: the row to look at
-        column: the column to look at
-        
-    Returns:
-        The tile at the row and column as its enum representation.
-    """
-    def get_tile(self, row, column):
-        return self.grid[row, column]
+        self.grid = np.full((self.rows, self.columns), dtype=Tile, fill_value=Tile.EMPTY)
+        self.shape = self.grid.shape
 
     def __getitem__(self, index):
         row, col = index
@@ -53,13 +37,8 @@ class Navmap:
         row, col = index
         self.grid[row, col] = value
 
-    """Sets the tile at the row and column.
-    
-    Args:
-        row: the row to look at
-        column: the column to look at
-        tile: the new tile to place
-    """
-    def set_tile(self, row, column, tile):
-        self.grid[row, column] = tile
-
+    def resize(self, rows, columns):
+        # noinspection PyDeprecation
+        # reason: numpy documentation says nothing about this being deprecated
+        np.ndarray.resize(self.grid, rows, columns, refcheck=False)
+        self.shape = self.grid.shape

@@ -2,6 +2,7 @@
 
 """
 import tkinter as tk
+from enum import Enum
 
 from app.model.globs import MINOR_PADY, MINOR_PADX
 
@@ -13,6 +14,12 @@ class InputFrame(tk.Frame):
 
     """
 
+    EVENTS = Enum('EVENTS',
+                  [
+                  ('RESIZE', "<<resize_grid>>"),
+                  ('RANDOMIZE', "<<randomize_maze>>"),
+                  ])
+
     def __init__(self, parent):
         """Constructor for the InputFrame class.
 
@@ -23,8 +30,8 @@ class InputFrame(tk.Frame):
         self.grid_columnconfigure(0, weight=1)  # so the column can expand in width
         self._setup_row_col_input()
         self._setup_randomization_input()
-        self._input_row_resize = 0
-        self._input_col_resize = 0
+        self.input_row_resize = 0
+        self.input_col_resize = 0
         self._input_empty_weight = 0
         self._input_obstacle_weight = 0
 
@@ -50,10 +57,9 @@ class InputFrame(tk.Frame):
 
         # submission button
         def _row_col_configure_command():
-            self._input_row_resize = row_input.get()
-            self._input_col_resize = col_input.get()
-            print(self._input_row_resize, self._input_col_resize)
-            pass
+            self.input_row_resize = row_input.get()
+            self.input_col_resize = col_input.get()
+            self.event_generate(self.EVENTS.RESIZE.value)
 
         row_col_button = tk.Button(row_col_shape_frame, text="Resize",
                                    padx=MINOR_PADX, pady=MINOR_PADY,
@@ -93,9 +99,9 @@ class InputFrame(tk.Frame):
 
         # submission button
         def _randomize_maze_command():
-            # navmap_util.randomize(maze)
-            # visual_grid.redraw()
-            pass
+            self._input_empty_weight = empty_tile_weight_input.get()
+            self._input_obstacle_weight = obst_tile_weight_input.get()
+            self.event_generate(self.EVENTS.RANDOMIZE.value)
 
         randomize_button = tk.Button(randomization_frame, text="Randomize Map",
                                      padx=MINOR_PADX, pady=MINOR_PADY,

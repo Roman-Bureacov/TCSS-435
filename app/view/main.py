@@ -33,18 +33,40 @@ label.pack()
 # first frame, the grid, the visual part
 visual_frame = tk.Frame(root,
                         width=frame_width, height=frame_height,
-                        padx=MINOR_PADX, pady=MINOR_PADY) # child of root
+                        padx=MINOR_PADX, pady=MINOR_PADY)
 
-# set up the row headers
 visual_grid = VisualGridFrame(visual_frame, maze, tile_width=25)
 visual_grid.pack()
 visual_frame.pack()
 
 # second frame, below the grid, the input
-input_frame = InputFrame(root) # child of root
+input_frame = InputFrame(root)
 
 input_frame.configure(width=500, height=100, padx=MINOR_PADX, pady=MINOR_PADY)
 input_frame.pack()
 input_frame.pack_propagate(False)
+
+# event handling
+def handle_resize_event(e):
+    r, c = input_frame.input_row_resize, input_frame.input_col_resize
+    # simple rejection
+    try:
+        r = int(r)
+        c = int(c)
+        if r < 1 or c < 1: raise ValueError
+    except ValueError:
+        print("Unacceptable input on row-column resize")
+        return
+
+    maze.resize(r, c)
+    visual_grid.rebuild()
+
+
+def handle_randomize_event(e):
+    print(e)
+    pass
+
+input_frame.bind(InputFrame.EVENTS.RESIZE.value, handle_resize_event)
+input_frame.bind(InputFrame.EVENTS.RANDOMIZE.value, handle_randomize_event)
 
 root.mainloop()
