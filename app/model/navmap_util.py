@@ -4,37 +4,42 @@ Here contained is the collection of functions that can be used to manipulate a n
 
 """
 from random import randint
-from globs import Tile
+from app.model.navmap import Tile
+import numpy as np
 
-"""places random tiles around the map
-
-places random tiles around the map, with specified weights. 
-Places one entrance and one exit.
-
-Args:
-    navmap: the navmap to modify
-    obstable_weight: the weight in which to place obstables
-    empty_weight: the weight in which to place empty tiles
-"""
 def randomize(navmap,
               obstacle_weight= 100,
               empty_weight= 100):
-    navmap[
-        randint(0, navmap.shape[0]),
-        randint(0, navmap.shape[1])
-    ] = Tile.HAZARD
+    """places random tiles around the map
 
-    navmap[
-        randint(0, navmap.shape[0]),
-        randint(0, navmap.shape[1])
-    ] = Tile.EXIT
+    places random tiles around the map, with specified weights.
+    Places one entrance and one exit.
+
+    Args:
+        navmap: the navmap to modify
+        obstacle_weight: the weight in which to place obstacles
+        empty_weight: the weight in which to place empty tiles
+    """
+    rows, columns = navmap.shape
+    
+    bag = np.array([ # bag of tiles to choose from
+        (r, c)
+        for r in range(rows)
+        for c in range(columns)
+    ])
+    np.random.shuffle(bag)
+    index = 0
+
+    r, c = bag[index]
+    navmap[r, c] = Tile.HAZARD
+
+    index += 1
+    r, c = bag[index]
+    navmap[r, c] = Tile.EXIT
 
     # place the empty and obstacle tiles around the map
-    for r in range(navmap.shape[0]):
-        for c in range(navmap.shape[1]):
-            looking_at = navmap[r, c]
-            if looking_at == Tile.HAZARD or looking_at == Tile.EXIT: continue
-            else:
-                r = randint(0, obstacle_weight + empty_weight)
-                if r < obstacle_weight: navmap[r, c] = Tile.obstacle_weight
-                else: navmap[r, c] = Tile.EMPTY
+    for i in bag[2:]: # skip the first two
+        r, c = i
+        rand = randint(0, obstacle_weight + empty_weight)
+        if rand < obstacle_weight: navmap[r, c] = Tile.OBSTACLE
+        else: navmap[r, c] = Tile.EMPTY
