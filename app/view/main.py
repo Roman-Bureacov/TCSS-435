@@ -27,8 +27,8 @@ root.configure(borderwidth=10)
 root.title("App")
 root.geometry(f"{frame_width}x{frame_height}")
 
-label = tk.Label(root, text="Hello World")
-label.pack()
+title_label = tk.Label(root, text="Uninitialized Grid")
+title_label.pack()
 
 # first frame, the grid, the visual part
 visual_frame = tk.Frame(root,

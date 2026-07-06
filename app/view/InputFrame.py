@@ -4,7 +4,8 @@
 import tkinter as tk
 from enum import Enum
 
-from app.model.globs import MINOR_PADY, MINOR_PADX
+from app.model.globs import MINOR_PADY, MINOR_PADX, glob_rows, glob_cols, glob_empty_tile_weight, \
+    glob_obstacle_tile_weight
 
 
 class InputFrame(tk.Frame):
@@ -28,12 +29,13 @@ class InputFrame(tk.Frame):
         """
         super().__init__(parent)
         self.grid_columnconfigure(0, weight=1)  # so the column can expand in width
+        self.input_row_resize = tk.IntVar(value=glob_rows)
+        self.input_col_resize = tk.IntVar(value=glob_cols)
+        self.input_empty_weight = tk.IntVar(value=glob_empty_tile_weight)
+        self.input_obstacle_weight = tk.IntVar(value=glob_obstacle_tile_weight)
+
         self._setup_row_col_input()
         self._setup_randomization_input()
-        self.input_row_resize = 0
-        self.input_col_resize = 0
-        self.input_empty_weight = 0
-        self.input_obstacle_weight = 0
 
     def _setup_row_col_input(self):
         """sets up the row/column count input for the user interface."""
@@ -45,12 +47,12 @@ class InputFrame(tk.Frame):
         row_col_label = tk.Label(row_col_shape_frame, text="Shape: (")
         row_col_label.grid(row=0, column=0)
 
-        row_input = tk.Entry(row_col_shape_frame, width=5)
+        row_input = tk.Entry(row_col_shape_frame, width=5, textvariable=self.input_row_resize)
         row_input.grid(row=0, column=1)
 
         tk.Label(row_col_shape_frame, text=",").grid(row=0, column=2)
 
-        col_input = tk.Entry(row_col_shape_frame, width=5)
+        col_input = tk.Entry(row_col_shape_frame, width=5, textvariable=self.input_col_resize)
         col_input.grid(row=0, column=3)
 
         tk.Label(row_col_shape_frame, text=")").grid(row=0, column=4)
@@ -76,7 +78,7 @@ class InputFrame(tk.Frame):
         # empty tile weight
         empty_tile_weight_frame = tk.Frame(randomization_frame)
         empty_tile_weight_label = tk.Label(empty_tile_weight_frame, text="Empty tile weight: ")
-        empty_tile_weight_input = tk.Entry(empty_tile_weight_frame, width=5)
+        empty_tile_weight_input = tk.Entry(empty_tile_weight_frame, width=5, textvariable=self.input_empty_weight)
 
         empty_tile_weight_label.grid(row=0, column=0)
         empty_tile_weight_input.grid(row=0, column=1)
@@ -88,7 +90,7 @@ class InputFrame(tk.Frame):
         # obstacle tile weight
         obst_tile_weight_frame = tk.Frame(randomization_frame)
         obst_tile_weight_label = tk.Label(obst_tile_weight_frame, text="Obstacle tile weight: ")
-        obst_tile_weight_input = tk.Entry(obst_tile_weight_frame, width=5)
+        obst_tile_weight_input = tk.Entry(obst_tile_weight_frame, width=5, textvariable=self.input_obstacle_weight)
 
         obst_tile_weight_label.grid(row=0, column=0)
         obst_tile_weight_input.grid(row=0, column=1)
