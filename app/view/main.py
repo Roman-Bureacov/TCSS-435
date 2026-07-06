@@ -24,10 +24,11 @@ maze = Navmap(glob_rows, glob_cols)
 root = tk.Tk()
 root.configure(borderwidth=10)
 
-root.title("App")
+root.title("TCSS 435 A")
 root.geometry(f"{frame_width}x{frame_height}")
 
 title_label = tk.Label(root, text="Uninitialized Grid")
+title_label.config(font=("Times New Roman", 18))
 title_label.pack()
 
 # first frame, the grid, the visual part
@@ -49,6 +50,7 @@ input_frame.pack_propagate(False)
 # event handling
 def handle_resize_event(e):
     r, c = input_frame.input_row_resize, input_frame.input_col_resize
+    title_label.config(text=f"{r} by {c} Grid, Tiles Unset")
     # simple rejection
     try:
         r = int(r)
@@ -64,6 +66,8 @@ def handle_resize_event(e):
 
 def handle_randomize_event(e):
     obstacle_weight, empty_weight = input_frame.input_obstacle_weight, input_frame.input_empty_weight
+    r, c = maze.shape
+    title_label.configure(text=f"{r} by {c} Grid, at Empty Weight {empty_weight} and Obstacle Weight {obstacle_weight}")
     # simple rejection
     try:
         obstacle_weight = int(obstacle_weight)
