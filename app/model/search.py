@@ -100,7 +100,7 @@ class BreadthFirstSearch(Search):
 
         for child in self.children_of(node):
             if child not in self.visited and child not in self.frontier:
-                self.frontier.insert(0, child)
+                self.frontier.insert(-1, child)
 
         return 1
 
