@@ -13,7 +13,8 @@ Tile = Enum('Tile', [
     ('OBSTACLE', 1),
     ('ENTRANCE', 2),
     ('HAZARD', 3),
-    ('EXIT', 4)
+    ('EXIT', 4),
+    ('VISITED', 5)
 ])
 
 class Navmap:

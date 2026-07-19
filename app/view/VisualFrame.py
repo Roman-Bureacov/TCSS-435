@@ -119,5 +119,7 @@ class VisualGridFrame(tk.Frame):
                 color = "red"
             case Tile.EXIT:
                 color = "black"
+            case Tile.VISITED:
+                color = "lightblue"
 
         self.grid_canvas.itemconfig(grid_tile, fill=color)

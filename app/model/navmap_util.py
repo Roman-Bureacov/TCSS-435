@@ -28,19 +28,20 @@ def randomize(navmap,
         for c in range(columns)
     ])
     np.random.shuffle(bag)
-    index = 0
 
-    r, c = bag[index]
-    navmap[r, c] = Tile.HAZARD
+    r, c = bag[0]
+    navmap[r, c] = Tile.ENTRANCE
     navmap.entrance = (r, c)
 
-    index += 1
-    r, c = bag[index]
+    r, c = bag[1]
     navmap[r, c] = Tile.EXIT
     navmap.exit = (r, c)
 
+    r, c = bag[2]
+    navmap[r, c] = Tile.HAZARD
+
     # place the empty and obstacle tiles around the map
-    for i in bag[2:]: # skip the first two
+    for i in bag[3:]: # skip the first three
         r, c = i
         rand = randint(0, obstacle_weight + empty_weight)
         if rand < obstacle_weight: navmap[r, c] = Tile.OBSTACLE

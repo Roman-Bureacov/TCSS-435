@@ -5,7 +5,8 @@
 import tkinter as tk
 
 from app.model import navmap_util
-from app.model.navmap import Navmap
+from app.model.navmap import Navmap, Tile
+import app.model.search as search
 
 from app.model.globs import glob_rows, glob_cols, MINOR_PADX, MINOR_PADY
 from app.view.InputFrame import InputFrame
@@ -84,7 +85,22 @@ def handle_randomize_event(e):
     visual_grid.redraw()
     pass
 
+def handle_perform_bfs_event(e):
+    bfs = search.BreadthFirstSearch(maze)
+    stats = bfs.search()
+    for r, c in stats.visited:
+        if maze[r, c] == Tile.EMPTY:
+            maze[r, c] = Tile.VISITED
+    visual_grid.redraw()
+def handle_perform_dfs_event(e):
+    pass
+def handle_perform_ucs_event(e):
+    pass
+
 input_frame.bind(InputFrame.EVENTS.RESIZE.value, handle_resize_event)
 input_frame.bind(InputFrame.EVENTS.RANDOMIZE.value, handle_randomize_event)
+input_frame.bind(InputFrame.EVENTS.PERFORM_BFS.value, handle_perform_bfs_event)
+input_frame.bind(InputFrame.EVENTS.PERFORM_DFS.value, handle_perform_dfs_event)
+input_frame.bind(InputFrame.EVENTS.PERFORM_UCS.value, handle_perform_ucs_event)
 
 root.mainloop()

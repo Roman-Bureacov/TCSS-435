@@ -4,16 +4,16 @@ Each algorithm will reset the navmap to search it again.
 
 """
 import time
-from navmap import Tile
+from dataclasses import dataclass, field
+
+from app.model.navmap import Tile
 from abc import ABC, abstractmethod
 
 class Search(ABC):
     """Abstract class for performing searches
 
     Attributes:
-        time: the time taken to search
-        nodes_expanded: the number of nodes expanded
-        path_length: the length of the path found
+        stats: the stats object that holds statistics in regards to this search
         goal: the goal (true if found, false if failure, None if not yet found)
     """
 
@@ -53,17 +53,18 @@ class Search(ABC):
             (nr, nc - 1),
             }:
             # simple bounds check
-            if 0 < cr < max_r and 0 < cc < max_c:
+            if 0 <= cr < max_r and 0 <= cc < max_c:
                 r.add((cr, cc))
         return r
 
+@dataclass
 class Stats:
     """Stores statistics to be returned by algorithms."""
-    time: int
-    nodes_expanded: int
-    path_length: int
-    goal: bool
-    visited: set
+    time: int = 0
+    nodes_expanded: int = 0
+    path_length: int = 0
+    goal: bool = False
+    visited: set = field(default_factory=set)
 
 class BreadthFirstSearch(Search):
     """Performs a breadth-first search on a navmap."""
@@ -79,8 +80,7 @@ class BreadthFirstSearch(Search):
         self.frontier.append(self.navmap.entrance)
         if not self._goal_test(self.frontier[0]): # goal test on the first node
             # first one was not the goal
-            while len(self.frontier) != 0: # while not empty
-                if self.goal: break
+            while len(self.frontier) > 0 and not self.goal: # while not empty and no goal
                 self.stats.nodes_expanded = self.stats.nodes_expanded + self._expand()
 
         self.stats.time_taken = time.perf_counter_ns() - start
@@ -93,13 +93,13 @@ class BreadthFirstSearch(Search):
         self.visited.add(node)
 
         match self.navmap[node]:
-            case Tile.WALL: return 0 # wall, can't do anything here
-            case Tile.EXIT: return 0 # hazard, can't go here
+            case Tile.OBSTACLE: return 0 # wall, can't do anything here
+            case Tile.HAZARD: return 0 # hazard, can't go here
 
         if self._goal_test(node): return 0 # goal found
 
         for child in self.children_of(node):
-            if child not in self.visited or child not in self.frontier:
+            if child not in self.visited and child not in self.frontier:
                 self.frontier.insert(0, child)
 
         return 1
@@ -152,23 +152,6 @@ def _clear_map(navmap):
     
     for r in navmap:
         for c in navmap[r]:
-            if navmap[r, c] not in [Tile.OBSTACLE, Tile.HAZARD, Tile.EXIT, Tile.ENTRANCE]:
+            if navmap[r, c] not in {Tile.OBSTACLE, Tile.HAZARD, Tile.EXIT, Tile.ENTRANCE}:
                 navmap[r, c] = Tile.EMPTY
-
-class Stats:
-    """Stores statistics to be returned by algorithms.
-
-    The Stats object is a fat struct of many attributes, some of
-    which may or may not be used.
-
-    Attributes:
-        path_length: the length of the path
-        number_nodes_expanded: the number of nodes expanded during the search
-        time: the time taken to perform
-    """
-    def __init__(self):
-        self.path_length = None
-        self.number_nodes_expanded = None
-        self.time = None
-        pass
 

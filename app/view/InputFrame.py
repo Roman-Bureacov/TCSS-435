@@ -16,10 +16,13 @@ class InputFrame(tk.Frame):
     """
 
     EVENTS = Enum('EVENTS',
-                  [
-                  ('RESIZE', "<<resize_grid>>"),
-                  ('RANDOMIZE', "<<randomize_maze>>"),
-                  ])
+                [
+                    ('RESIZE', "<<resize_grid>>"),
+                    ('RANDOMIZE', "<<randomize_maze>>"),
+                    ('PERFORM_BFS', "<<perform_bfs>>"),
+                    ('PERFORM_DFS', "<<perform_dfs>>"),
+                    ('PERFORM_UCS', "<<perform_ucs>>"),
+                ])
 
     def __init__(self, parent):
         """Constructor for the InputFrame class.
@@ -121,21 +124,21 @@ class InputFrame(tk.Frame):
 
 
         def bfs_button_command():
-            pass
+            self.event_generate(self.EVENTS.PERFORM_BFS.value)
         bfs_button = tk.Button(button_frame, text="Breadth-First Search",
                                width=20,
                                command=bfs_button_command)
         bfs_button.grid(row=0, column=0, padx=MINOR_PADX, pady=0,)
 
         def dfs_button_command():
-            pass
+            self.event_generate(self.EVENTS.PERFORM_DFS.value)
         dfs_button = tk.Button(button_frame, text="Depth-First Search",
                                width=20,
                                command=dfs_button_command)
         dfs_button.grid(row=1, column=0, padx=MINOR_PADX, pady=0,)
 
         def ucs_button_command():
-            pass
+            self.event_generate(self.EVENTS.PERFORM_UCS.value)
         ucs_button = tk.Button(button_frame, text="Uniform-Cost Search",
                                width=20,
                                command=ucs_button_command)
