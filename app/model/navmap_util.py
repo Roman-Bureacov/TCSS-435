@@ -32,10 +32,12 @@ def randomize(navmap,
 
     r, c = bag[index]
     navmap[r, c] = Tile.HAZARD
+    navmap.entrance = (r, c)
 
     index += 1
     r, c = bag[index]
     navmap[r, c] = Tile.EXIT
+    navmap.exit = (r, c)
 
     # place the empty and obstacle tiles around the map
     for i in bag[2:]: # skip the first two

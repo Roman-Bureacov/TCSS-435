@@ -28,6 +28,8 @@ class Navmap:
         self.columns = columns
         self.grid = np.full((self.rows, self.columns), dtype=Tile, fill_value=Tile.EMPTY)
         self.shape = self.grid.shape
+        self.entrance = None
+        self.exit = None
 
     def __getitem__(self, index):
         row, col = index

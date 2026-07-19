@@ -36,6 +36,8 @@ class InputFrame(tk.Frame):
 
         self._setup_row_col_input()
         self._setup_randomization_input()
+        self._setup_search_input()
+        self._setup_search_stats()
 
     def _setup_row_col_input(self):
         """sets up the row/column count input for the user interface."""
@@ -112,6 +114,59 @@ class InputFrame(tk.Frame):
 
         randomization_frame.grid(row=0, column=1, sticky="ew")
 
+    def _setup_search_input(self):
+        """sets up the three buttons for starting searches on the user interface."""
+
+        button_frame = tk.Frame(self, padx=MINOR_PADX, pady=MINOR_PADY)
 
 
+        def bfs_button_command():
+            pass
+        bfs_button = tk.Button(button_frame, text="Breadth-First Search",
+                               width=20,
+                               command=bfs_button_command)
+        bfs_button.grid(row=0, column=0, padx=MINOR_PADX, pady=0,)
 
+        def dfs_button_command():
+            pass
+        dfs_button = tk.Button(button_frame, text="Depth-First Search",
+                               width=20,
+                               command=dfs_button_command)
+        dfs_button.grid(row=1, column=0, padx=MINOR_PADX, pady=0,)
+
+        def ucs_button_command():
+            pass
+        ucs_button = tk.Button(button_frame, text="Uniform-Cost Search",
+                               width=20,
+                               command=ucs_button_command)
+        ucs_button.grid(row=2, column=0, padx=MINOR_PADX, pady=0,)
+
+        button_frame.grid(row=1, column=1)
+
+    def _setup_search_stats(self):
+        """sets up the stats text below the search buttons."""
+
+        stats_frame = tk.Frame(self, padx=MINOR_PADX, pady=MINOR_PADY)
+        
+        # path length label
+        path_length_label = tk.Label(stats_frame, text="Path Length: ")
+        path_length_label.config(width=20)
+        path_length_label.grid(row=0, column=0, sticky="w")
+        path_length_stat_label = tk.Label(stats_frame, text="N/A")
+        path_length_stat_label.grid(row=0, column=1, sticky="w")
+        
+        # nodes expanded label
+        nodes_expanded_label = tk.Label(stats_frame, text="Nodes Expanded: ")
+        nodes_expanded_label.config(width=20)
+        nodes_expanded_label.grid(row=1, column=0, sticky="w")
+        nodes_expanded_stat_label = tk.Label(stats_frame, text="N/A")
+        nodes_expanded_stat_label.grid(row=1, column=1, sticky="w")
+        
+        # execution time label
+        time_label = tk.Label(stats_frame, text="Time: ")
+        time_label.config(width=20)
+        time_label.grid(row=2, column=0, sticky="w")
+        time_stat_label = tk.Label(stats_frame, text="N/A")
+        time_stat_label.grid(row=2, column=1, sticky="w")
+
+        stats_frame.grid(row=1, column=0)

@@ -43,7 +43,7 @@ visual_frame.pack()
 # second frame, below the grid, the input
 input_frame = InputFrame(root)
 
-input_frame.configure(width=500, height=100, padx=MINOR_PADX, pady=MINOR_PADY)
+input_frame.configure(width=500, height=150, padx=MINOR_PADX, pady=MINOR_PADY)
 input_frame.pack()
 input_frame.pack_propagate(False)
 
