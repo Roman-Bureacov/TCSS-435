@@ -107,6 +107,7 @@ def handle_perform_dfs_event(e):
     dfs = search.DepthFirstSearch(maze)
     stats = dfs.search()
     mark_visited(maze, stats.visited)
+    mark_path(maze, stats.path)
     visual_grid.redraw()
     input_frame.update_search_stats(stats)
 def handle_perform_ucs_event(e):
