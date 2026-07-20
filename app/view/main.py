@@ -85,15 +85,30 @@ def handle_randomize_event(e):
     visual_grid.redraw()
     pass
 
+def mark_visited(navmap, visited):
+    for r, c in visited:
+        if navmap[r, c] == Tile.EMPTY:
+            navmap[r, c] = Tile.VISITED
+
+def mark_path(navmap, path):
+    for r, c in path:
+        tile = navmap[r, c]
+        if tile not in {Tile.OBSTACLE, Tile.ENTRANCE, Tile.HAZARD, Tile.EXIT}:
+            navmap[r, c] = Tile.PATH
+
 def handle_perform_bfs_event(e):
     bfs = search.BreadthFirstSearch(maze)
     stats = bfs.search()
-    for r, c in stats.visited:
-        if maze[r, c] == Tile.EMPTY:
-            maze[r, c] = Tile.VISITED
+    mark_visited(maze, stats.visited)
+    mark_path(maze, stats.path)
     visual_grid.redraw()
+    input_frame.update_search_stats(stats)
 def handle_perform_dfs_event(e):
-    pass
+    dfs = search.DepthFirstSearch(maze)
+    stats = dfs.search()
+    mark_visited(maze, stats.visited)
+    visual_grid.redraw()
+    input_frame.update_search_stats(stats)
 def handle_perform_ucs_event(e):
     pass
 

@@ -114,12 +114,14 @@ class VisualGridFrame(tk.Frame):
             case Tile.OBSTACLE:
                 color = "gray"
             case Tile.ENTRANCE:
-                color = "green"
+                color = "black"
             case Tile.HAZARD:
                 color = "red"
             case Tile.EXIT:
-                color = "black"
+                color = "green"
             case Tile.VISITED:
                 color = "lightblue"
+            case Tile.PATH:
+                color = "lightgreen"
 
         self.grid_canvas.itemconfig(grid_tile, fill=color)

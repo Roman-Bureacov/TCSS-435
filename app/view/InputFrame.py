@@ -37,6 +37,8 @@ class InputFrame(tk.Frame):
         self.input_empty_weight = tk.IntVar(value=glob_empty_tile_weight)
         self.input_obstacle_weight = tk.IntVar(value=glob_obstacle_tile_weight)
 
+        self.stats_labels = dict()
+
         self._setup_row_col_input()
         self._setup_randomization_input()
         self._setup_search_input()
@@ -150,26 +152,41 @@ class InputFrame(tk.Frame):
         """sets up the stats text below the search buttons."""
 
         stats_frame = tk.Frame(self, padx=MINOR_PADX, pady=MINOR_PADY)
-        
+
         # path length label
         path_length_label = tk.Label(stats_frame, text="Path Length: ")
         path_length_label.config(width=20)
         path_length_label.grid(row=0, column=0, sticky="w")
         path_length_stat_label = tk.Label(stats_frame, text="N/A")
         path_length_stat_label.grid(row=0, column=1, sticky="w")
-        
+        self.stats_labels["path_length"] = path_length_stat_label
+
         # nodes expanded label
         nodes_expanded_label = tk.Label(stats_frame, text="Nodes Expanded: ")
         nodes_expanded_label.config(width=20)
         nodes_expanded_label.grid(row=1, column=0, sticky="w")
         nodes_expanded_stat_label = tk.Label(stats_frame, text="N/A")
         nodes_expanded_stat_label.grid(row=1, column=1, sticky="w")
-        
+        self.stats_labels["nodes_expanded"] = nodes_expanded_stat_label
+
         # execution time label
-        time_label = tk.Label(stats_frame, text="Time: ")
+        time_label = tk.Label(stats_frame, text="Time (ns): ")
         time_label.config(width=20)
         time_label.grid(row=2, column=0, sticky="w")
         time_stat_label = tk.Label(stats_frame, text="N/A")
         time_stat_label.grid(row=2, column=1, sticky="w")
+        self.stats_labels["time"] = time_stat_label
 
         stats_frame.grid(row=1, column=0)
+
+    def update_search_stats(self, stats):
+        """updates this frame's search statistics using the relevant search stats object.
+
+        Args:
+            stats: the stats object generated from a search
+        """
+
+        self.stats_labels["path_length"].config(text=stats.path_length)
+        self.stats_labels["nodes_expanded"].config(text=stats.nodes_expanded)
+        self.stats_labels["time"].config(text=stats.time)
+
