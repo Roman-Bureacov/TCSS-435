@@ -36,12 +36,7 @@ class Search(ABC):
         _clear_map(self.navmap)
         start = time.perf_counter_ns() # start of search
 
-        root = Node(self.navmap.entrance, None)
-        self.frontier.append(root)
-        if not self._goal_test(root): # goal test on the first node
-            # first one was not the goal
-            while len(self.frontier) > 0 and not self.goal: # while not empty and no goal
-                self.stats.nodes_expanded += self._expand()
+        self._perform()
 
         self.stats.time_taken = time.perf_counter_ns() - start # end of search
         self.stats.goal = self.goal
@@ -57,6 +52,14 @@ class Search(ABC):
                 node = node.parent
 
         return self.stats
+
+    def _perform(self):
+        root = Node(self.navmap.entrance, None)
+        if not self._goal_test(root):  # goal test on the first node
+            # first one was not the goal
+            self.frontier.append(root)
+            while len(self.frontier) > 0 and not self.goal:  # while not empty and no goal
+                self.stats.nodes_expanded += self._expand()
 
     @abstractmethod
     def _expand(self):
@@ -155,16 +158,28 @@ class DepthFirstSearch(Search):
 
         return 1
 
+
 class UniformCostSearch(Search):
     """Performs a uniform cost search on a navmap."""
 
-    # we need the cheapest element always accessible... what about a heap?
+    def _perform(self):
+        root = Node(self.navmap.entrance, None)
+
+        if not self._goal_test(root):  # goal test on the first node
+            # first one was not the goal
+            self.frontier_cost = dict() # mapping of node -> cost
+            heapq.heappush(self.frontier, (0, root))
+            self.frontier_cost[root] = 0
+            while len(self.frontier) > 0 and not self.goal:  # while not empty and no goal
+                self.stats.nodes_expanded += self._expand()
+
+    # we need the cheapest element always accessible... what about a min heap?
     # https://docs.python.org/3/library/heapq.html
     def _expand(self):
-        node = heapq.heappop(frontier)
-        node = self.frontier_nodes.pop(0)
+        cost, node = heapq.heappop(self.frontier)
+        self.frontier_cost.pop(node)
 
-        self.visited.add(node.data)
+        self.visited.add(node)
 
         match self.navmap[node.data]:
             case Tile.OBSTACLE:
@@ -175,18 +190,42 @@ class UniformCostSearch(Search):
         if self._goal_test(node):  # goal found
             return 0
 
-        children_nodes = self.children_of(node)
-        children_nodes.reverse()  # otherwise the nodes are added in reverse to the FIFO queue
-        for child in children_nodes:
-            if child.data not in self.visited and child.data not in self.frontier:
-                # FIFO
-                self.frontier.insert(0, child.data)
-                self.frontier_nodes.insert(0, child)
+        for child in self.children_of(node):
+            if child not in self.visited and child not in self.frontier_cost:
+                # min heap
+                total = cost + self._cost_of(child, node)
+                heapq.heappush(self.frontier, (total, child))
+                self.frontier_cost[child] = total
+            elif child in self.frontier_cost:
+                # get child from heap
+                current_cost = self.frontier_cost[child]
+                new_cost = cost + self._cost_of(child, node)
+                if new_cost < current_cost: # replace that node
+                    i = self.frontier.index((current_cost, child))
+                    self.frontier[i] = (new_cost, child)
+                    heapq.heapify(self.frontier)
+                    self.frontier_cost[child] = new_cost
 
         return 1
 
-    
-    
+    # noinspection PyMethodMayBeStatic
+    def _cost_of(self, child, parent):
+        cr, cc = child.data
+        pr, pc = parent.data
+
+        if cr < pr:
+            return 1  # up is 1
+        elif cr > pr:
+            return 2  # down is 2
+        elif cc < pc:
+            return 3  # left is 3
+        else:
+            return 4  # right is 4
+
+        # TODO: current impementation of nodes has no tie-breaker,
+        #       this results in TypeError when there is an expected tie-breaker.
+        #       In addition, somehow implement the pre-defined tie-breaker...
+
 def _clear_map(navmap):
     """Clears the navmap of any other data.
     

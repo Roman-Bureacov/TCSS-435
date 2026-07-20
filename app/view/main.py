@@ -111,7 +111,12 @@ def handle_perform_dfs_event(e):
     visual_grid.redraw()
     input_frame.update_search_stats(stats)
 def handle_perform_ucs_event(e):
-    pass
+    ucs = search.UniformCostSearch(maze)
+    stats = ucs.search()
+    mark_visited(maze, stats.visited)
+    mark_path(maze, stats.path)
+    visual_grid.redraw()
+    input_frame.update_search_stats(stats)
 
 input_frame.bind(InputFrame.EVENTS.RESIZE.value, handle_resize_event)
 input_frame.bind(InputFrame.EVENTS.RANDOMIZE.value, handle_randomize_event)
