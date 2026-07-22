@@ -6,6 +6,7 @@ from enum import Enum
 
 from app.model.globs import MINOR_PADY, MINOR_PADX, glob_rows, glob_cols, glob_empty_tile_weight, \
     glob_obstacle_tile_weight
+from app.model.search import Stats
 
 
 class InputFrame(tk.Frame):
@@ -188,5 +189,5 @@ class InputFrame(tk.Frame):
 
         self.stats_labels["path_length"].config(text=stats.path_length)
         self.stats_labels["nodes_expanded"].config(text=stats.nodes_expanded)
-        self.stats_labels["time"].config(text=stats.time)
+        self.stats_labels["time"].config(text=stats.translate_time(stats.time))
 

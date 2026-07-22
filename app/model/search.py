@@ -38,7 +38,7 @@ class Search(ABC):
 
         self._perform()
 
-        self.stats.time_taken = time.perf_counter_ns() - start # end of search
+        self.stats.time = time.perf_counter_ns() - start # end of search
         self.stats.goal = self.goal
         for n in self.visited:
             self.stats.visited.add(n.data)
@@ -99,6 +99,7 @@ class Search(ABC):
                 node.children.append(child)
         return node.children
 
+
 @dataclass
 class Stats:
     """Stores statistics to be returned by algorithms."""
@@ -108,6 +109,35 @@ class Stats:
     path: list = field(default_factory=list)
     goal: bool = False
     visited: set = field(default_factory=set)
+
+    def translate_time(self, ns):
+        """ Translates a time span into a more readable format
+
+        Args:
+            ns: the time span in nanoseconds
+
+        Returns
+            a string with the new time and unit
+        """
+        r = ns
+        u = "ns"
+        if r > 10**3:
+            r /= 10**3 # convert into microsecond
+            u = "mus"
+            if r > 10**3: # convert into millisecond
+                r /= 10**3
+                u = "ms"
+                if r > 10**3: # convert into seconds
+                    r /= 10**3
+                    u = "s"
+                    if r > 60: # convert into minutes
+                        r /= 60
+                        u = "m"
+                        if r > 60: # convert into hours
+                            r /= 60
+                            u = "h"
+
+        return f"{r:.2f} {u}"
 
 class BreadthFirstSearch(Search):
     """Performs a breadth-first tree search on a navmap."""
@@ -171,13 +201,14 @@ class UniformCostSearch(Search):
 
         if not self._goal_test(root):  # goal test on the first node
             # first one was not the goal
-            self.frontier_cost = dict() # mapping of node -> cost
+            self.frontier_nodes = dict() # mapping of node -> cost
             # all nodes will store:
             #   (total cost, self cost, recency, node)
             # the self cost is to be used as a tie-breaker
             # recency is a last-resort tie-breaker, most recent goes
-            heapq.heappush(self.frontier, (0, 0, self.counter(), root))
-            self.frontier_cost[root] = 0
+            heapnode = (0, 0, self.counter(), root)
+            heapq.heappush(self.frontier, heapnode)
+            self.frontier_nodes[root] = heapnode
             while len(self.frontier) > 0 and not self.goal:  # while not empty and no goal
                 self.stats.nodes_expanded += self._expand()
 
@@ -185,7 +216,7 @@ class UniformCostSearch(Search):
     # https://docs.python.org/3/library/heapq.html
     def _expand(self):
         total_cost, self_cost, recency, node = heapq.heappop(self.frontier)
-        self.frontier_cost.pop(node)
+        self.frontier_nodes.pop(node)
 
         self.visited.add(node)
 
@@ -199,22 +230,23 @@ class UniformCostSearch(Search):
             return 0
 
         for child in self.children_of(node):
-            if child not in self.visited and child not in self.frontier_cost:
+            if child not in self.visited and child not in self.frontier_nodes:
                 # min heap
                 child_cost = self._cost_of(child, node)
                 total = total_cost + child_cost
-                heapq.heappush(self.frontier, (total, child_cost, self.counter(), child))
-                self.frontier_cost[child] = total
-            elif child in self.frontier_cost:
+                heapnode = (total, child_cost, self.counter(), child)
+                heapq.heappush(self.frontier, heapnode)
+                self.frontier_nodes[child] = heapnode
+            elif child in self.frontier_nodes:
                 # get child from heap
-                current_cost = self.frontier_cost[child]
-                child_cost = self._cost_of(child, node)
+                current_cost, child_cost, count, _ = self.frontier_nodes[child]
+                new_child_cost = self._cost_of(child, node)
                 new_cost = total_cost + child_cost
                 if new_cost < current_cost: # replace that node if it's more expensive
-                    i = self.frontier.index((current_cost, child))
+                    i = self.frontier.index((current_cost, child_cost, count, child))
                     self.frontier[i] = (new_cost, child_cost, self.counter(), child)
                     heapq.heapify(self.frontier) # re-heap
-                    self.frontier_cost[child] = new_cost
+                    self.frontier_nodes[child] = new_cost
 
         return 1
 
