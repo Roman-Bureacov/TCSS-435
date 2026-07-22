@@ -239,14 +239,16 @@ class UniformCostSearch(Search):
                 self.frontier_nodes[child] = heapnode
             elif child in self.frontier_nodes:
                 # get child from heap
-                current_cost, child_cost, count, _ = self.frontier_nodes[child]
+                current_cost, old_child_cost, count, _ = self.frontier_nodes[child]
                 new_child_cost = self._cost_of(child, node)
-                new_cost = total_cost + child_cost
+                new_cost = total_cost + new_child_cost
                 if new_cost < current_cost: # replace that node if it's more expensive
-                    i = self.frontier.index((current_cost, child_cost, count, child))
-                    self.frontier[i] = (new_cost, child_cost, self.counter(), child)
+                    child.parent = node # re-parent
+                    i = self.frontier.index((current_cost, old_child_cost, count, child))
+                    new_heapnode = (new_cost, old_child_cost, self.counter(), child)
+                    self.frontier[i] = (new_cost, old_child_cost, self.counter(), child)
                     heapq.heapify(self.frontier) # re-heap
-                    self.frontier_nodes[child] = new_cost
+                    self.frontier_nodes[child] = new_heapnode
 
         return 1
 
