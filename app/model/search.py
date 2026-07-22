@@ -162,13 +162,21 @@ class DepthFirstSearch(Search):
 class UniformCostSearch(Search):
     """Performs a uniform cost search on a navmap."""
 
+    def __init__(self, navmap):
+        Search.__init__(self, navmap)
+        self.count = 0
+
     def _perform(self):
         root = Node(self.navmap.entrance, None)
 
         if not self._goal_test(root):  # goal test on the first node
             # first one was not the goal
             self.frontier_cost = dict() # mapping of node -> cost
-            heapq.heappush(self.frontier, (0, root))
+            # all nodes will store:
+            #   (total cost, self cost, recency, node)
+            # the self cost is to be used as a tie-breaker
+            # recency is a last-resort tie-breaker, most recent goes
+            heapq.heappush(self.frontier, (0, 0, self.counter(), root))
             self.frontier_cost[root] = 0
             while len(self.frontier) > 0 and not self.goal:  # while not empty and no goal
                 self.stats.nodes_expanded += self._expand()
@@ -176,7 +184,7 @@ class UniformCostSearch(Search):
     # we need the cheapest element always accessible... what about a min heap?
     # https://docs.python.org/3/library/heapq.html
     def _expand(self):
-        cost, node = heapq.heappop(self.frontier)
+        total_cost, self_cost, recency, node = heapq.heappop(self.frontier)
         self.frontier_cost.pop(node)
 
         self.visited.add(node)
@@ -193,17 +201,19 @@ class UniformCostSearch(Search):
         for child in self.children_of(node):
             if child not in self.visited and child not in self.frontier_cost:
                 # min heap
-                total = cost + self._cost_of(child, node)
-                heapq.heappush(self.frontier, (total, child))
+                child_cost = self._cost_of(child, node)
+                total = total_cost + child_cost
+                heapq.heappush(self.frontier, (total, child_cost, self.counter(), child))
                 self.frontier_cost[child] = total
             elif child in self.frontier_cost:
                 # get child from heap
                 current_cost = self.frontier_cost[child]
-                new_cost = cost + self._cost_of(child, node)
-                if new_cost < current_cost: # replace that node
+                child_cost = self._cost_of(child, node)
+                new_cost = total_cost + child_cost
+                if new_cost < current_cost: # replace that node if it's more expensive
                     i = self.frontier.index((current_cost, child))
-                    self.frontier[i] = (new_cost, child)
-                    heapq.heapify(self.frontier)
+                    self.frontier[i] = (new_cost, child_cost, self.counter(), child)
+                    heapq.heapify(self.frontier) # re-heap
                     self.frontier_cost[child] = new_cost
 
         return 1
@@ -222,9 +232,9 @@ class UniformCostSearch(Search):
         else:
             return 4  # right is 4
 
-        # TODO: current impementation of nodes has no tie-breaker,
-        #       this results in TypeError when there is an expected tie-breaker.
-        #       In addition, somehow implement the pre-defined tie-breaker...
+    def counter(self):
+        self.count += 1
+        return self.count
 
 def _clear_map(navmap):
     """Clears the navmap of any other data.
