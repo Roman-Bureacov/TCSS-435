@@ -7,6 +7,8 @@ import heapq
 import time
 from dataclasses import dataclass, field
 
+import numpy as np
+
 from app.model.navmap import Tile
 from abc import ABC, abstractmethod
 
@@ -269,6 +271,55 @@ class UniformCostSearch(Search):
     def counter(self):
         self.count += 1
         return self.count
+
+class AStarSearch(Search):
+
+    def _perform(self):
+        # min heap for finding the cheapest path
+        self.frontier = []
+        self.frontier_set = set()
+        self.count = 0
+
+        node = Node(self.navmap.entrance, None)
+        if not self._goal_test(node):
+            n = (0 + self.h(node), self.counter(), 0, node)
+            heapq.heappush(self.frontier, n)
+            self.frontier_set.add(node)
+            while len(self.frontier) > 0 and not self.goal:  # while not empty and no goal
+                self.stats.nodes_expanded += self._expand()
+
+    def _expand(self):
+        estimated_cost, _, path_cost, node = heapq.heappop(self.frontier)
+        self.frontier_set.remove(node)
+        self.visited.add(node)
+
+        match self.navmap[node.data]:
+            case Tile.OBSTACLE:
+                return 0  # wall, can't do anything here
+            case Tile.HAZARD:
+                return 0  # hazard, can't go here
+
+        if self._goal_test(node):  # goal found
+            return 0
+
+        for child in self.children_of(node):
+            if child not in self.visited and child not in self.frontier_set:
+                heapq.heappush(self.frontier, (path_cost + 1 + self.h(child), self.counter(), path_cost + 1, child))
+                self.frontier_set.add(child)
+        return 1
+
+    def h(self, node):
+        """heuristic function"""
+        nr, nc = node.data # node
+        gr, gc = self.navmap.exit # goal
+
+        return np.sqrt((nr - gr) ** 2 + (nc - gc) ** 2)
+
+    def counter(self):
+        self.count += 1
+        return self.count
+
+
 
 def _clear_map(navmap):
     """Clears the navmap of any other data.

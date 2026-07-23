@@ -96,32 +96,26 @@ def mark_path(navmap, path):
         if tile not in {Tile.OBSTACLE, Tile.ENTRANCE, Tile.HAZARD, Tile.EXIT}:
             navmap[r, c] = Tile.PATH
 
+def perform_search(algorithm):
+    stats = algorithm.search()
+    mark_visited(maze, stats.visited)
+    mark_path(maze, stats.path)
+    visual_grid.redraw()
+    input_frame.update_search_stats(stats)
 def handle_perform_bfs_event(e):
-    bfs = search.BreadthFirstSearch(maze)
-    stats = bfs.search()
-    mark_visited(maze, stats.visited)
-    mark_path(maze, stats.path)
-    visual_grid.redraw()
-    input_frame.update_search_stats(stats)
+    perform_search(search.BreadthFirstSearch(maze))
 def handle_perform_dfs_event(e):
-    dfs = search.DepthFirstSearch(maze)
-    stats = dfs.search()
-    mark_visited(maze, stats.visited)
-    mark_path(maze, stats.path)
-    visual_grid.redraw()
-    input_frame.update_search_stats(stats)
+    perform_search(search.DepthFirstSearch(maze))
 def handle_perform_ucs_event(e):
-    ucs = search.UniformCostSearch(maze)
-    stats = ucs.search()
-    mark_visited(maze, stats.visited)
-    mark_path(maze, stats.path)
-    visual_grid.redraw()
-    input_frame.update_search_stats(stats)
+    perform_search(search.UniformCostSearch(maze))
+def handle_perform_ass_event(e):
+    perform_search(search.AStarSearch(maze))
 
 input_frame.bind(InputFrame.EVENTS.RESIZE.value, handle_resize_event)
 input_frame.bind(InputFrame.EVENTS.RANDOMIZE.value, handle_randomize_event)
 input_frame.bind(InputFrame.EVENTS.PERFORM_BFS.value, handle_perform_bfs_event)
 input_frame.bind(InputFrame.EVENTS.PERFORM_DFS.value, handle_perform_dfs_event)
 input_frame.bind(InputFrame.EVENTS.PERFORM_UCS.value, handle_perform_ucs_event)
+input_frame.bind(InputFrame.EVENTS.PERFORM_ASS.value, handle_perform_ass_event)
 
 root.mainloop()

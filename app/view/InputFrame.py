@@ -2,12 +2,11 @@
 
 """
 import tkinter as tk
+from tkinter import ttk
 from enum import Enum
 
 from app.model.globs import MINOR_PADY, MINOR_PADX, glob_rows, glob_cols, glob_empty_tile_weight, \
     glob_obstacle_tile_weight
-from app.model.search import Stats
-
 
 class InputFrame(tk.Frame):
     """Class representing a frame of the user interface.
@@ -23,7 +22,16 @@ class InputFrame(tk.Frame):
                     ('PERFORM_BFS', "<<perform_bfs>>"),
                     ('PERFORM_DFS', "<<perform_dfs>>"),
                     ('PERFORM_UCS', "<<perform_ucs>>"),
+                    ('PERFORM_ASS', "<<perform_ass>>"),
                 ])
+
+    _SEARCH_OPTIONS = Enum('_SEARCH_OPTIONS',
+                           [
+                               ('BREADTH_FIRST_SEARCH', "Breadth-First Search"),
+                               ('DEPTH_FIRST_SEARCH', "Depth-First Search"),
+                               ('UNIFORM_COST_SEARCH', "Uniform Cost Search"),
+                               ('A_STAR_SEARCH', "A* Search"),
+                           ])
 
     def __init__(self, parent):
         """Constructor for the InputFrame class.
@@ -121,33 +129,40 @@ class InputFrame(tk.Frame):
         randomization_frame.grid(row=0, column=1, sticky="ew")
 
     def _setup_search_input(self):
-        """sets up the three buttons for starting searches on the user interface."""
+        """sets up the combo box for starting searches on the user interface."""
 
         button_frame = tk.Frame(self, padx=MINOR_PADX, pady=MINOR_PADY)
 
+        # Combo box of search algorithms
+        combo_box = ttk.Combobox(button_frame,
+                                 values=[
+                                     InputFrame._SEARCH_OPTIONS.BREADTH_FIRST_SEARCH.value,
+                                     InputFrame._SEARCH_OPTIONS.DEPTH_FIRST_SEARCH.value,
+                                     InputFrame._SEARCH_OPTIONS.UNIFORM_COST_SEARCH.value,
+                                     InputFrame._SEARCH_OPTIONS.A_STAR_SEARCH.value,
+                                 ],
+                                 width=20)
+        combo_box.grid(row=0, column=0)
 
-        def bfs_button_command():
-            self.event_generate(self.EVENTS.PERFORM_BFS.value)
-        bfs_button = tk.Button(button_frame, text="Breadth-First Search",
-                               width=20,
-                               command=bfs_button_command)
-        bfs_button.grid(row=0, column=0, padx=MINOR_PADX, pady=0,)
+        # the initiator
+        def search_button_command():
+            opt = combo_box.get()
+            match opt:
+                case InputFrame._SEARCH_OPTIONS.BREADTH_FIRST_SEARCH.value:
+                    self.event_generate(self.EVENTS.PERFORM_BFS.value)
+                case InputFrame._SEARCH_OPTIONS.DEPTH_FIRST_SEARCH.value:
+                    self.event_generate(self.EVENTS.PERFORM_DFS.value)
+                case InputFrame._SEARCH_OPTIONS.UNIFORM_COST_SEARCH.value:
+                    self.event_generate(self.EVENTS.PERFORM_UCS.value)
+                case InputFrame._SEARCH_OPTIONS.A_STAR_SEARCH.value:
+                    self.event_generate(self.EVENTS.PERFORM_ASS.value)
 
-        def dfs_button_command():
-            self.event_generate(self.EVENTS.PERFORM_DFS.value)
-        dfs_button = tk.Button(button_frame, text="Depth-First Search",
-                               width=20,
-                               command=dfs_button_command)
-        dfs_button.grid(row=1, column=0, padx=MINOR_PADX, pady=0,)
+        search_button = tk.Button(button_frame, text="Search",
+                                  width=20,
+                                  command=search_button_command)
+        search_button.grid(row=1, column=0)
 
-        def ucs_button_command():
-            self.event_generate(self.EVENTS.PERFORM_UCS.value)
-        ucs_button = tk.Button(button_frame, text="Uniform-Cost Search",
-                               width=20,
-                               command=ucs_button_command)
-        ucs_button.grid(row=2, column=0, padx=MINOR_PADX, pady=0,)
-
-        button_frame.grid(row=1, column=1)
+        button_frame.grid(row=1, column=1,)
 
     def _setup_search_stats(self):
         """sets up the stats text below the search buttons."""
